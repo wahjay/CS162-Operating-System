@@ -1,0 +1,71 @@
+
+1. What is the value of argv?
+
+0x7fffffffe608
+
+2. What is pointed to by argv?
+
+0x7fffffffe83b "/home/vagrant/code/personal/hw0/wc"
+
+3. What is the address of the function main?
+
+0x4007af
+
+4. Try info stack. Explain what you see.
+
+#0  main (argc=2, argv=0x7fffffffe608) at wc.c:44
+
+It shows the current frame, function, argument starting address,
+and its line position in the function.
+
+5. Try info frame. Explain what you see.
+
+Stack level 0, frame at 0x7fffffffe530:
+ rip = 0x4006f7 in main (wc.c:47); saved rip = 0x7ffff7a32f45
+ source language c.
+ Arglist at 0x7fffffffe520, args: argc=2, argv=0x7fffffffe608
+ Locals at 0x7fffffffe520, Previous frame's sp is 0x7fffffffe530
+ Saved registers:
+  rbp at 0x7fffffffe520, rip at 0x7fffffffe528
+
+It shows that we are at stack level 0, and at stack frame 0x7fffffffe530.
+The instruction pointer register rip holds the next instruction to execute,
+which is 0x4006f7, then it is saved at 0x7ffff7a32f45, which is the return address.
+It also shows the starting address of argument list: 0x7fffffffe520,
+as well as the address of local variables: 0x7fffffffe520.
+It also shows the address of the previous stack frame stack pointer: 0x7fffffffe530.
+rbp register is saved at 0x7fffffffe520 and rip register is saved at 0x7fffffffe528.
+
+
+6. Try info registers. Which registers are holding aspects of the program that you recognize?
+
+rax            0x66	102
+rbx            0x0	0
+rcx            0x7ffff7b00360	140737348895584
+rdx            0x66	102
+rsi            0x6020f0	6299888
+rdi            0x3	3
+rbp            0x7fffffffe520	0x7fffffffe520
+rsp            0x7fffffffe4f0	0x7fffffffe4f0
+r8             0xffffffff	4294967295
+r9             0x0	0
+r10            0x22	34
+r11            0x246	582
+r12            0x400520	4195616
+r13            0x7fffffffe600	140737488348672
+r14            0x0	0
+r15            0x0	0
+rip            0x4006f7	0x4006f7 <main+234>
+eflags         0x202	[ IF ]
+cs             0x33	51
+ss             0x2b	43
+ds             0x0	0
+es             0x0	0
+fs             0x0	0
+gs             0x0	0
+
+
+I only recognize the register rbp, which is at 0x7fffffffe520
+as it is appeared in the 'info frame' as a saved register, local variable as well as an argument.
+
+

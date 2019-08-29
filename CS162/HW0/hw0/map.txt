@@ -1,0 +1,76 @@
+Output from 'objdump -D map' :
+
+_main  @ 0x4005c2
+recur @ 0x40057d
+_main stack: 0x7ffdc91e34ac
+static data: 0x601048
+Heap: malloc 1: 0x1a01010
+Heap: malloc 2: 0x1a01080
+recur call 3: stack@ 0x7ffdc91e347c
+recur call 2: stack@ 0x7ffdc91e344c
+recur call 1: stack@ 0x7ffdc91e341c
+recur call 0: stack@ 0x7ffdc91e33ec
+
+
+1. Which of the addresses from the output of running ./map are defined in the executable, 
+and which segment/section is each defined in?
+
+recur @ 0x40057d defined in section .text
+_main  @ 0x4005c2 defined in section .text
+static data: 0x601048 defined in section .data
+
+2. Make a list of the important segments, and what they are used for.
+
+.interp: It holds the path name of a program interpreter.
+.note.ABI-tag: It is used to specify ABI details.
+.note.gnu.build-id: It contains unique identification for the built files.
+.gnu.hash: It holds a symbol hash table.
+.dynsym: It holds the dynamic linking symbol table.
+.dynstr: It holds strings need for dynamic linking.
+.gnu.version: It contains the symbol version table.
+.gnu.version_r: It contains the version requirements.
+.rela.dyn: It holds RELA type relocation information for all sections of a shared library except the PLT.
+.rela.plt: It holds the RELA type relocation information for the PLT section of a shared library or dynamically linked applicaiton.
+.init: It holds data that is executed at program startup.
+.plt: It holds the procedure linkage table.
+.text: It holds the executable instructions of the program.
+.fini: It holds executable instructions that are responsible for the process termination.
+.rodata: It holds read-only data.
+.eh_frame_hdr: It contains a pointer to the .eh_grame section.
+.eh_frame: It contains information necessary for frame unwinding during exception handling.
+.init_array: It holds an array of function pointers that contributes to a single initialization array for the executable.
+.fini_array: It holds an array of function pointers that contributes to a single termination array for the executable.
+.jcr: It contains information necessary for registering compiled java classes.
+.dynamic: It holds dynamic linking information.
+.got: It holds the global offset table.
+.got.plt: It holds the global positive offset table.
+.data: It holds initialized data that contribute to the program's memory image.
+.bss: It holds uninitialized data that contribute to the program's memory image.
+.comment: It holds version control information.
+.debug_aranges: It holds lookup table for mapping addresses to compilation units.
+.debug_info: It holds core DWARF information section.
+.debug_abbrev: It holds abbreviations used in the .debug_info section.
+.debug_line: It holds line number information.
+.debug_str: It holds string table used in .debug_info section.
+
+
+3. What direction is the stack growing in?
+
+The stack grows downward.
+
+4. How large is the stack frame for each recursive call?
+
+48 bytes.
+
+5. Where is the heap? What direction is it growing in?
+
+The heap is located at the bottom of the memory region,
+and thus the heap is growing upward.
+
+6. Are the two malloc()ed memory areas contiguous?
+
+No. There are some extra space between their addresses.
+
+6 bytes memory space between them.
+
+

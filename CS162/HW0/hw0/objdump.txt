@@ -1,0 +1,24 @@
+1. What file format is used for this binary? And what architecture is it compiled for?
+
+The file format used: elf64-x86-64
+Architecture that is compiled for: i386:x86-64
+
+2. What are some of the names of segment/sections you find?
+
+Sections that I found: .init, .plt, .text, .fini
+
+3. What segment/section contains main (the function) and what is the address of main?
+
+Section .text contains the function main. 
+The address of main: 00000000004007af
+
+4. Do you see the stack segment anywhere? What about the heap? Explain.
+
+I do not see any stack sgement nor heap in the output generated from objdump.
+Since objdump takes an executable file as argument, stack segment or heap info
+should not be in it. The executable file basically is a file that contains some 
+encoded instructions to perform some tasks, while stack and heap only come in when
+we run an executable file. In other words, stack and heap is a runtime concept.
+The executable file only shows a list of instructions, telling the computer what to
+do. Whereas, the compiler and OS execute and manage these instructions using stack and heap
+on runtime.    

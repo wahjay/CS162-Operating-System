@@ -1,0 +1,5 @@
+ 4  8 47 text3.txt
+der3
+text2.txt
+text3.txt
+text.txt
