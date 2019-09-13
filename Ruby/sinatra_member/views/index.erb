@@ -1,0 +1,21 @@
+<fieldset style="font-size:90%; width:300px; height:auto; border-width:medium;">
+ <legend style="font-size:120%; text-align:center"><b> Members </b></legend>
+  <ul style="list-style-type:none;">
+   <% @names.each do |name| %>
+     <li><p style="text-align:right; font-size:16px"><a href="/members/<%= name %>"><b><%= name %></b></a>
+         &emsp;&emsp;
+         <a href="/members/<%= name %>/edit">Edit</a>
+         &emsp;&emsp;
+
+         <!-- if get confirmation, redirect to this link, else do nothing -->
+         <a href="/members/<%= name %>/delete"
+            onclick="return confirm('Are you sure you want to remove <%= name %>?');">Delete</a></p>
+     </li>
+   <% end %>
+  </ul>
+</fieldset><br>
+
+<!-- <p style="text-align:center"><a href="/members/new">Add a new member</a></p> -->
+<form action="/members/new" style="text-align:center">
+    <input type="submit" value="Add a new member" class="button">
+</form>

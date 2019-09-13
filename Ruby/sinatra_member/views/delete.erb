@@ -1,0 +1,15 @@
+<br>
+<% if @message %>
+  <p style="text-align:center">(<%= @message %> <b><%= @name %></b> ? )</p>
+<% end %>
+
+<fieldset style="width:0px; width:200px; height:auto; border:0px;">
+  <form action="/members" style="text-align:center" class="form">
+      <input type="submit" value="Cancel" class="tiny_butt" style="background-color:#4CAF50;">
+  </form>
+
+  <form action="/members/<%= @name %>" method="post" style="text-align:center" class="form">
+      <input name="_method" type="hidden" value="delete">
+      <input type="submit" value="Delete" class="tiny_butt" style="background-color:#f44336;">
+ </form>
+</fieldset>
