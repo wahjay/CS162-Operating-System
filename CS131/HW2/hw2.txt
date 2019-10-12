@@ -1,0 +1,22 @@
+I decide to write make_parser in terms of make_matcher because I couldn't
+because it is easier to implement make_parser. I just modified something in
+the make_matcher for make_parser. However, I couldn't generate a parse tree
+as I run the modified make_matcher function, so the modified make_matcher function,
+which is the make_parser function, just outputs a list of rules that are used to
+parse the prefix.
+
+And then after I got the list of rules, I used a mutually recursive helper function
+to convert that list of rules into a parser tree.
+
+For the modified make_matcher function (make_parser fucntion), I just add two more arguments
+to the original make_matcher function, one is the "start symbol" while the other is 
+the "derive." These two arguments are used to record the rules that are used to match the
+fragment list. Also, I modifed the accpetor for the make_parser in order for it to sucessfully
+output a list of rule. 
+
+
+
+Some weakness that I have known would be the "head recurisve" grammar:
+
+(A, function A -> [[N A; T "p"]; [T "p"]])
+

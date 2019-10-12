@@ -1,0 +1,258 @@
+2019-06-03 00:13:53,387  - Input: eggert.cs.ucla.edu -33.867052 +151.1957362 1520023934.918963997
+2019-06-03 00:13:53,387  - Attempting to Connect with server Wilkes
+2019-06-03 00:13:53,388  - Successful Connection with server Wilkes
+2019-06-03 00:13:53,388  - Attempting to Connect with server Goloman
+2019-06-03 00:13:53,389  - Successful Connection with server Goloman
+2019-06-03 00:13:53,392  - Input: eggert.cs.ucla.edu -33.867052 +151.1957362 1520023934.918963997
+2019-06-03 00:13:53,393  - Input: eggert.cs.ucla.edu -33.867052 +151.1957362 1520023934.918963997
+2019-06-03 00:14:43,365  - Input: IAMAT wiki.cs.ucla.edu -33.8670522+151.1957362 1520023934.918963997
+2019-06-03 00:14:43,366  - Attempting to Connect with server Wilkes
+2019-06-03 00:14:43,366  - Successful Connection with server Wilkes
+2019-06-03 00:14:43,367  - Attempting to Connect with server Goloman
+2019-06-03 00:14:43,367  - Successful Connection with server Goloman
+2019-06-03 00:14:43,368  - Output: AT Hands +0.00014145392924547195 wiki.cs.ucla.edu -33.8670522+151.1957362 1520023934.918963997
+2019-06-03 00:14:43,369  - Input: wiki.cs.ucla.edu -33.867052 +151.1957362 1520023934.918963997
+2019-06-03 00:14:43,369  - Attempting to Connect with server Wilkes
+2019-06-03 00:14:43,370  - Input: wiki.cs.ucla.edu -33.867052 +151.1957362 1520023934.918963997
+2019-06-03 00:14:43,370  - Successful Connection with server Wilkes
+2019-06-03 00:14:43,371  - Attempting to Connect with server Goloman
+2019-06-03 00:14:43,371  - Successful Connection with server Goloman
+2019-06-03 00:15:40,066  - Input: WHATSAT wiki.cs.ucla.edu 50 5
+2019-06-03 00:15:40,066  - Output: AT Hands +0.0001582978293299675 wiki.cs.ucla.edu -33.867052+151.1957362 1520023934.918963997
+2019-06-03 00:15:40,531  - {
+    "html_attributions": [],
+    "results": [
+        {
+            "geometry": {
+                "location": {
+                    "lat": -33.8670713,
+                    "lng": 151.1955933
+                },
+                "viewport": {
+                    "northeast": {
+                        "lat": -33.86572226970851,
+                        "lng": 151.1969423302915
+                    },
+                    "southwest": {
+                        "lat": -33.8684202302915,
+                        "lng": 151.1942443697085
+                    }
+                }
+            },
+            "icon": "https://maps.gstatic.com/mapfiles/place_api/icons/geocode-71.png",
+            "id": "bafa5c05cc42a7cf4aba645ef4abcb202f85c985",
+            "name": "Pirrama Road",
+            "place_id": "ChIJ-aI8TTauEmsRcnTSDkILszo",
+            "reference": "ChIJ-aI8TTauEmsRcnTSDkILszo",
+            "scope": "GOOGLE",
+            "types": [
+                "route"
+            ],
+            "vicinity": "Pyrmont"
+        },
+        {
+            "geometry": {
+                "location": {
+                    "lat": -33.8667062,
+                    "lng": 151.1957844
+                },
+                "viewport": {
+                    "northeast": {
+                        "lat": -33.8652870697085,
+                        "lng": 151.1969000802915
+                    },
+                    "southwest": {
+                        "lat": -33.8679850302915,
+                        "lng": 151.1942021197085
+                    }
+                }
+            },
+            "icon": "https://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png",
+            "id": "3ef986cd56bb3408bc1cf394f3dad9657c1d30f6",
+            "name": "Doltone House - Darling Island",
+            "opening_hours": {
+                "open_now": true
+            },
+            "photos": [
+                {
+                    "height": 810,
+                    "html_attributions": [
+                        "<a href=\"https://maps.google.com/maps/contrib/108270736464416141350/photos\">Doltone House - Darling Island</a>"
+                    ],
+                    "photo_reference": "CmRaAAAAHGHQAq3ABgpI4Mwgq_hpQggtVcrp7YJfFbrR3ljuVEya1B_HA8RoTjRlq4DOSZ8elFJFCwBx38JshLiVJ3RA4FGnkhGqrwIbrBPXPzbqxbQE2cR99UeahXWmWc2fQW8QEhDdshT04HxG8bVkxw2OqNcNGhTUuFo3kBF7yRkjf7NxEj_QASt15g",
+                    "width": 1200
+                }
+            ],
+            "place_id": "ChIJ5xQ7szeuEmsRs6Kj7YFZE9k",
+            "plus_code": {
+                "compound_code": "45MW+88 Pyrmont, New South Wales, Australia",
+                "global_code": "4RRH45MW+88"
+            },
+            "rating": 4.3,
+            "reference": "ChIJ5xQ7szeuEmsRs6Kj7YFZE9k",
+            "scope": "GOOGLE",
+            "types": [
+                "food",
+                "point_of_interest",
+                "establishment"
+            ],
+            "user_ratings_total": 239,
+            "vicinity": "Ground Floor/48 Pirrama Road, Pyrmont"
+        },
+        {
+            "geometry": {
+                "location": {
+                    "lat": -33.8666199,
+                    "lng": 151.1958527
+                },
+                "viewport": {
+                    "northeast": {
+                        "lat": -33.86529116970851,
+                        "lng": 151.1969473802915
+                    },
+                    "southwest": {
+                        "lat": -33.86798913029151,
+                        "lng": 151.1942494197085
+                    }
+                }
+            },
+            "icon": "https://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png",
+            "id": "4f89212bf76dde31f092cfc14d7506555d85b5c7",
+            "name": "Google Australia",
+            "opening_hours": {
+                "open_now": true
+            },
+            "photos": [
+                {
+                    "height": 2448,
+                    "html_attributions": [
+                        "<a href=\"https://maps.google.com/maps/contrib/118445948371232118987/photos\">\u00fcmit tomar</a>"
+                    ],
+                    "photo_reference": "CmRaAAAA-9Xa7SfRojiacUgPCCcqY4qeNxEGX5ARlq1jbBTGFOKn4uKeE4pRtNgDzxeGcIPQ-5Rz7L8K42rbfx-dMmYxeZSU5W59g-bpWm4yZNAbWf5_ggI6innTdlXB0vGyOdGWEhB0fJEihybxKw9_xuagGAzrGhQl5D31DJuvDIp1ROxjNcKuQncwRg",
+                    "width": 3264
+                }
+            ],
+            "place_id": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+            "plus_code": {
+                "compound_code": "45MW+98 Pyrmont, New South Wales, Australia",
+                "global_code": "4RRH45MW+98"
+            },
+            "rating": 4.2,
+            "reference": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+            "scope": "GOOGLE",
+            "types": [
+                "point_of_interest",
+                "establishment"
+            ],
+            "user_ratings_total": 732,
+            "vicinity": "48 Pirrama Road, Pyrmont"
+        },
+        {
+            "geometry": {
+                "location": {
+                    "lat": -33.8669667,
+                    "lng": 151.1958862
+                },
+                "viewport": {
+                    "northeast": {
+                        "lat": -33.8656646697085,
+                        "lng": 151.1970863302915
+                    },
+                    "southwest": {
+                        "lat": -33.8683626302915,
+                        "lng": 151.1943883697085
+                    }
+                }
+            },
+            "icon": "https://maps.gstatic.com/mapfiles/place_api/icons/cafe-71.png",
+            "id": "7eaf747a3f6dc078868cd65efc8d3bc62fff77d7",
+            "name": "Biaggio Cafe",
+            "opening_hours": {
+                "open_now": false
+            },
+            "photos": [
+                {
+                    "height": 3024,
+                    "html_attributions": [
+                        "<a href=\"https://maps.google.com/maps/contrib/102509464988728112776/photos\">Patrick Catanzariti</a>"
+                    ],
+                    "photo_reference": "CmRaAAAAV9MO1Zn9JHlxQyLclPOOk75r8Ur7m5bRiWEXYhHwNbpPMBnSoJsrI9hZHuYWF6_VH6bJH9bZZQnBRyTDg_eJ6iteEe5jsKr24LdJ0Kr2yKZsw6XTetiLvsBn2LHxdZmuEhCEnX2k43jakGwdtUnJ0taOGhTksh4KaNIO-Qufv7PPZCJhC_M1Kg",
+                    "width": 4032
+                }
+            ],
+            "place_id": "ChIJIfBAsjeuEmsRdgu9Pl1Ps48",
+            "plus_code": {
+                "compound_code": "45MW+69 Pyrmont, New South Wales, Australia",
+                "global_code": "4RRH45MW+69"
+            },
+            "price_level": 1,
+            "rating": 3.5,
+            "reference": "ChIJIfBAsjeuEmsRdgu9Pl1Ps48",
+            "scope": "GOOGLE",
+            "types": [
+                "cafe",
+                "restaurant",
+                "food",
+                "store",
+                "point_of_interest",
+                "establishment"
+            ],
+            "user_ratings_total": 44,
+            "vicinity": "48 Pirrama Road, Pyrmont"
+        },
+        {
+            "geometry": {
+                "location": {
+                    "lat": -33.8673595,
+                    "lng": 151.1955698
+                },
+                "viewport": {
+                    "northeast": {
+                        "lat": -33.8659763697085,
+                        "lng": 151.1970353302915
+                    },
+                    "southwest": {
+                        "lat": -33.8686743302915,
+                        "lng": 151.1943373697085
+                    }
+                }
+            },
+            "icon": "https://maps.gstatic.com/mapfiles/place_api/icons/bar-71.png",
+            "id": "2428201e8793d9c59b9431dc92c5d33fde3b9a1d",
+            "name": "Marquee Sydney",
+            "opening_hours": {
+                "open_now": false
+            },
+            "photos": [
+                {
+                    "height": 3729,
+                    "html_attributions": [
+                        "<a href=\"https://maps.google.com/maps/contrib/101183729279021583631/photos\">Marquee Sydney</a>"
+                    ],
+                    "photo_reference": "CmRaAAAAUBsS9-H7XujeiqwBX_OFZyzrNwhhczL1A8Vz3b4uI1Sf4G_V-evw6WD9E8SankA9pecwTnxwWzGvDiw8rrDAPBcOIBdZelGDJemM5Y52_wNLArmOHtR8-G3X5bs3NT3vEhANVVI02PBbNjZB1o34iXFiGhQ3JHmWThC0v7Edu322t-YQ9dEzkQ",
+                    "width": 5593
+                }
+            ],
+            "place_id": "ChIJYdJUVDauEmsRp-7oNoEMhuQ",
+            "plus_code": {
+                "compound_code": "45MW+36 Pyrmont, New South Wales, Australia",
+                "global_code": "4RRH45MW+36"
+            },
+            "rating": 3.4,
+            "reference": "ChIJYdJUVDauEmsRp-7oNoEMhuQ",
+            "scope": "GOOGLE",
+            "types": [
+                "night_club",
+                "bar",
+                "point_of_interest",
+                "establishment"
+            ],
+            "user_ratings_total": 263,
+            "vicinity": "Pirrama Road, Pyrmont"
+        }
+    ],
+    "status": "OK"
+}
+2019-06-03 00:16:04,369  - Input: WHATSAT apple.cs.ucla.edu 50 5
+2019-06-03 00:16:04,369  - Error: ? WHATSAT apple.cs.ucla.edu 50 5
+2019-06-03 00:17:29,097  - Disconnceting from other servers.

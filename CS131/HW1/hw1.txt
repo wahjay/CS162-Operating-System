@@ -1,0 +1,23 @@
+
+   (1) The basic idea is that I first get the rules from the grammar rules excluding the
+       start symbol, so I can retrieve the rules easily later on when used as argument.
+
+   (2) Then I modified the set_intersection function a little, which only check if the left hand
+       side of the rule is in the start symbol list instead of checking the set elements. (by the way, I
+       passed start smbol as a single element list along with the rules to the set_intersection)
+       The function will return a list of symbols that can be reached by the start symbol (namely,
+       as long as the first component of the tuple is in the start symbol list, it will be appened
+       to the next call) Since I used the computed_fixed_point function, which take equal_sets function,
+       this set_intersection function and the start symbol list as arguments, this step will be executed
+       recursively until all the symbols that can be reached by the start symbol are appened to the list.
+
+   (3) Also, I want to mention that at the end of set_intersection function, it will return a bunch of unpolished tuples. 
+       I then will use some helper functions or list modules to filter out all the unwated components and keeping only those
+       that I need. I use 'List.map snd ()' to retrieve only the second components of those tuples,
+       which are lists of rule. And then filter out all the terminal symbols in the list using 'List.filter'.
+       Therefore, after this step, I have a list of nonterminal symbols, which can tell me which rule I should
+       pick to create the reachable rules. 
+
+       Finally, I did (2) one more time by comparing the list of nonterminal symbols I just generated with the original list of
+       rules from the grammar. Excpet at this time, I don't filter out any unwanted nonterminal symbols and stuff since this is
+       the list of reachable rules I want.
