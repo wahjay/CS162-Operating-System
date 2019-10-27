@@ -1,6 +1,6 @@
 
 
-|Homework | Score |
-|!--------|-------|
+|Homework | Score |   
+|--------|-------|   
 | HW1 | 100%   |
-| HW2 | 98.31% (no time for the last hidden test case)|
+| HW2 | 98.31%  (missed 1 or 2 hidden test case)|
