@@ -1,4 +1,4 @@
-## Pintos Operating System 
+## Pintos Operating System (Summer at UC Berkeley)
 
 ### Project 3
 

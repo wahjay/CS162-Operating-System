@@ -33,6 +33,26 @@ public class MyVisitor extends GJDepthFirst {
 
     @Override
     public Object visit(Goal n, Object argu) {
+        //check acyclic here
+        ClassList instance = ClassList.getInstance();
+        for(ClassTable CT : instance.C_List.values()) {
+          //System.out.println(CT.ID.accept(this,argu));
+          String child_id = (String)CT.ID.accept(this,argu);
+          ClassTable child_CT = CT;
+          String parent_id = CT.get_super_id();
+
+          while(parent_id != null) {
+            if(child_id.equals(parent_id)) {
+              System.out.println("Type error");
+              System.exit(0);
+            }
+
+            //keep searching for parent_id until null
+            child_CT = instance.get(parent_id);
+            parent_id = child_CT.get_super_id();
+          }
+       }
+
         return super.visit(n, argu);
     }
 
@@ -43,7 +63,8 @@ public class MyVisitor extends GJDepthFirst {
         ClassTable CT = instance.get(className);
         String mainName = (String) n.f6.accept(this,argu);
         MethodTable MT = CT.get_method(mainName);
-        instance.set_cur(MT); //set 'this' class as current environment
+        instance.set_cur(MT); //set 'this' method as current scope
+        instance.set_cur_class(CT); //set 'this' class as current env
 
         return super.visit(n, argu);
     }
@@ -52,7 +73,6 @@ public class MyVisitor extends GJDepthFirst {
     public Object visit(TypeDeclaration n, Object argu) {
         //System.out.println(n.f0.choice.accept(this,argu));
         return n.f0.choice.accept(this, argu);
-        //return super.visit(n, argu);
     }
 
     @Override
@@ -60,20 +80,62 @@ public class MyVisitor extends GJDepthFirst {
         ClassList instance = ClassList.getInstance();
         String className = (String) n.f1.accept(this,argu);
         ClassTable CT = instance.get(className);
-        instance.set_cur(CT); //set 'this' class as current environment
-
+        instance.set_cur_class(CT); //set 'this' class as current environment
         return super.visit(n, argu);
     }
 
     @Override
     public Object visit(ClassExtendsDeclaration n, Object argu) {
+        ClassList instance = ClassList.getInstance();
+        String className = (String) n.f1.accept(this,argu);
+        String superClassName = (String)n.f3.accept(this,argu);
+        ClassTable CT = instance.get(className);
+        instance.set_cur_class(CT); //set 'this' class as current environment
+
+        //check if the super class exists
+        if(!instance.C_List.containsKey(superClassName)) {
+          System.out.println("Type error");
+          System.exit(0);
+        }
+
+        if(instance.CheckOverload(className, superClassName)) {
+          System.out.println("Type error");
+          System.exit(0);
+        }
+
         return super.visit(n, argu);
     }
 
     @Override
     public Object visit(VarDeclaration n, Object argu) {
+        //Node type = n.f0.f0.choice;
+        //make sure ID exists
+        ClassList instance = ClassList.getInstance();
+        Object obj = instance.get_cur();
+        MethodTable MT = null;
+        ClassTable CT = null;
+        String id = (String) n.f1.accept(this,argu);
+        Node type = null;
+
+
+        if(obj instanceof MethodTable) {
+          MT = (MethodTable) obj;
+          type = MT.p_get(id) == null ? MT.l_get(id) : MT.p_get(id);
+          ClassTable ct = (ClassTable) instance.get_cur_class();
+        }
+        else if (obj instanceof ClassTable) {
+          CT = (ClassTable) obj;
+          type = CT.get_field(id);
+        }
+
+        if (!(type instanceof BooleanType || type instanceof ArrayType
+            || type instanceof IntegerType || type instanceof Identifier) ) {
+              System.out.println("1Type error");
+              System.exit(0);
+        }
+
         //return the type node
-        return n.f0.f0.choice;
+        return null;
     }
 
     @Override
@@ -84,19 +146,23 @@ public class MyVisitor extends GJDepthFirst {
         //just enter into a new scope
         //need to update cur environment
         Object temp = instance.get_cur_class();
+        ClassTable Ctemp = null;
+        MethodTable Mtemp = null;
         if (temp != null) {
-          ClassTable Ctemp = (ClassTable) temp;
-          MethodTable Mtemp = Ctemp.get_method(MethodName);
+          Ctemp = (ClassTable) temp;
+          Mtemp = Ctemp.get_method(MethodName);
 
           //Mtemp == null means we do enter into a new scope
           //and its from a class env to another class env
+          //so cur class does not know cur method name.
           //the folliwng line of code will only update env
-          //in the same class env, we skip this, we are fine.
+          //if cur method is inside its class env,
+          //if it's not null, we will set cur method as cur scope.
           if(Mtemp != null)
             instance.set_cur(Mtemp);
         }
 
-        //just in case the pre env is null,
+        //just in case the cur class is null,
         //the following lines of code are needed
         //get class table from current environment
         Object Table = instance.get_cur();
@@ -119,14 +185,14 @@ public class MyVisitor extends GJDepthFirst {
         Node ret_type = MT.get_ret();
         Node ret = null;
 
-        //Note!!!: the return statement could be a BooleanLiteral like 'true' or 'false'
         //check if the return statement is an ID or a IntegerLiteral
         if(obj instanceof String)
           ret = MT.l_get((String) obj);
         else
           ret = (Node) obj;
 
-        if(!ret_type.getClass().equals(ret.getClass())) {
+
+        if(ret == null || ret_type == null ||!ret_type.getClass().equals(ret.getClass())) {
           System.out.println("Type error");
           System.exit(0);
         }
@@ -213,25 +279,128 @@ public class MyVisitor extends GJDepthFirst {
           String r_id = (String) obj;
           right = MT.p_get(r_id) == null ? MT.l_get(r_id) : MT.p_get(r_id);
         }
+        else if (obj instanceof Identifier)
+          right = (Identifier) obj;
         else
           right = (Node) obj;
 
-        //System.out.println("id: " + id);
-        //System.out.println("left: " + left);
-        //System.out.println("right: " + right);
-        //ret_type == null means variable does not exist or is declared before
-        if(left == null || right == null || !right.getClass().equals(left.getClass())) {
+        //check if left or right ID exists
+        if(left == null || right == null) {
           System.out.println("Type error");
           System.exit(0);
         }
 
-        return left;
-        //return super.visit(n, argu);
+        String left_type = (String)left.accept(this,argu);
+        String right_type = (String)right.accept(this,argu);
+        //compare type String name (i.e int, boolean, Tree, etc)
+        //if either type is null, maybe because the type is array,
+        //so we need to check that, too
+        if(left_type != null && right_type != null && left_type.equals(right_type))
+          return null;
+
+        else {
+          //compare array type
+          if (right instanceof ArrayType) {
+            if(!right.getClass().equals(left.getClass())) {
+              System.out.println("Type error");
+              System.exit(0);
+            }
+            else
+              return null;
+          }
+
+          //handle subtype here
+          else {
+              if(left_type == null || right_type == null) {
+                System.out.println("Type error");
+                System.exit(0);
+              }
+              //get both-side class table
+              ClassTable left_ct = instance.get(left_type);
+              ClassTable right_ct = instance.get(right_type);
+
+              if(left_ct == null || right_ct == null) {
+                System.out.println("Type error");
+                System.exit(0);
+              }
+
+              //then get both side super class
+              String left_super_type = left_ct.get_super_id();
+              String right_super_type = right_ct.get_super_id();
+
+              //compare
+              if(left_type.equals(right_super_type))
+                return null;
+              //transitive compare
+              else if (instance.get(right_super_type) != null) {
+                while (right_super_type != null && !left_type.equals(right_super_type)) {
+                  right_ct = instance.get(right_super_type);
+                  right_super_type = right_ct.get_super_id();
+
+                  if(left_type.equals(right_super_type))
+                    return null;
+                }
+
+                //after the while loop, if still not equal, then error
+                if(right_super_type == null && !left_type.equals(right_super_type))
+                 {
+                   System.out.println("Type error");
+                   System.exit(0);
+                 }
+              }
+
+              else {
+                System.out.println("Type error");
+                System.exit(0);
+              }
+          }
+        }
+
+        return null;
     }
 
     @Override
     public Object visit(ArrayAssignmentStatement n, Object argu) {
-        return super.visit(n, argu);
+        ClassList instance = ClassList.getInstance();
+        MethodTable MT = (MethodTable) instance.get_cur();
+        Object arr_obj = n.f0.accept(this,argu);
+        Object ele_obj = n.f2.accept(this,argu);
+        Object rhs_obj = n.f5.accept(this,argu);
+        Node arr_type = null;
+        Node ele_type = null;
+        Node rhs_type = null;
+
+        //array ID must be array type
+        if (arr_obj instanceof String) {
+          String arr_id = (String) arr_obj;
+          arr_type = MT.p_get(arr_id) == null ? MT.l_get(arr_id) : MT.p_get(arr_id);
+        }
+        else if (arr_obj instanceof ArrayType)
+          arr_type = (ArrayType) arr_obj;
+
+        //array element must be an IntegerType
+        if (ele_obj instanceof String) {
+          String ele_id = (String) ele_obj;
+          ele_type = MT.p_get(ele_id) == null ? MT.l_get(ele_id) : MT.p_get(ele_id);
+        }
+        else if (ele_obj instanceof IntegerType)
+          ele_type = (IntegerType) ele_obj;
+
+        //rhs must be an IntegerType
+        if (rhs_obj instanceof String) {
+          String rhs_id = (String) rhs_obj;
+          rhs_type = MT.p_get(rhs_id) == null ? MT.l_get(rhs_id) : MT.p_get(rhs_id);
+        }
+        else if (rhs_obj instanceof IntegerType)
+          rhs_type = (IntegerType) rhs_obj;
+
+        if(!(arr_type instanceof ArrayType && ele_type instanceof IntegerType
+          && rhs_type instanceof IntegerType)) {
+            System.out.println("Type error");
+            System.exit(0);
+          }
+
+        return null;
     }
 
     @Override
@@ -241,19 +410,12 @@ public class MyVisitor extends GJDepthFirst {
         Object obj = n.f2.accept(this,argu);
         Node type = null;
 
-        if (obj == null)
-          System.out.println(n.f2.f0.choice);
-
-        if(obj instanceof Identifier) {
-          System.out.println("if fix this");
-          System.exit(0);
-        }
-
-        if(obj instanceof String && (String) obj != "true" && (String) obj != "false")
+        if(obj instanceof String)
           type = MT.p_get((String) obj) == null ? MT.l_get((String) obj) : MT.p_get((String) obj);
         else if (obj instanceof BooleanType)
-          {}
-        else if ((String) obj != "true" || (String) obj != "false") {
+          type = (BooleanType) obj;
+
+        if(!(type instanceof BooleanType)){
           System.out.println("Type error");
           System.exit(0);
         }
@@ -268,14 +430,43 @@ public class MyVisitor extends GJDepthFirst {
 
     @Override
     public Object visit(WhileStatement n, Object argu) {
-        //System.out.println(n.f2.f0.choice.accept(this,argu));
-        return super.visit(n, argu);
+        ClassList instance = ClassList.getInstance();
+        MethodTable MT = (MethodTable) instance.get_cur();
+        Object obj = n.f2.accept(this,argu);
+        Node type = null;
+
+        if(obj instanceof String)
+          type = MT.p_get((String) obj) == null ? MT.l_get((String) obj) : MT.p_get((String) obj);
+        else if (obj instanceof BooleanType)
+          type = (BooleanType) obj;
+
+        if(!(type instanceof BooleanType)){
+          System.out.println("Type error");
+          System.exit(0);
+        }
+
+        n.f4.accept(this,argu);
+        return null;
     }
 
     @Override
     public Object visit(PrintStatement n, Object argu) {
-        return n.f2.f0.choice.accept(this,argu);
-        //return super.visit(n, argu);
+        ClassList instance = ClassList.getInstance();
+        MethodTable MT = (MethodTable) instance.get_cur();
+        Node type = null;
+        Object obj = n.f2.accept(this,argu);
+
+        if (obj instanceof String)
+          type = MT.p_get((String) obj) == null ? MT.l_get((String) obj) : MT.p_get((String) obj);
+        else if (obj instanceof IntegerType)
+          type = (IntegerType) obj;
+
+        if(!(type instanceof IntegerType)) {
+          System.out.println("Type error");
+          System.exit(0);
+        }
+
+        return new IntegerType();
     }
 
     @Override
@@ -294,11 +485,6 @@ public class MyVisitor extends GJDepthFirst {
         String rid = null;
         Node left = null;
         Node right = null;
-
-        if(left_obj instanceof Identifier || right_obj instanceof Identifier) {
-          System.out.println("and fix this");
-          System.exit(0);
-        }
 
         if (left_obj instanceof String) {
           lid = (String) left_obj;
@@ -333,11 +519,6 @@ public class MyVisitor extends GJDepthFirst {
         String rid = null;
         Node left = null;
         Node right = null;
-
-        if (left_obj instanceof Identifier || right_obj instanceof Identifier) {
-          System.out.println("compare fix this");
-          System.exit(0);
-        }
 
         if (left_obj instanceof String) {
           lid = (String) left_obj;
@@ -383,11 +564,6 @@ public class MyVisitor extends GJDepthFirst {
           String id = (String) left;
           left_type = MT.l_get(id);
         }
-        //or else it should be type error
-        else {
-          System.out.println("Type error");
-          System.exit(0);
-        }
 
         if (right instanceof IntegerType) {
           right_type = (Node) right;
@@ -397,20 +573,13 @@ public class MyVisitor extends GJDepthFirst {
           String id = (String) right;
           right_type = MT.l_get(id);
         }
-        //or else it should be type error
-        else {
-          System.out.println("Type error");
-          System.exit(0);
-        }
 
         if(left_type == null || right_type == null || !left_type.getClass().equals(right_type.getClass())) {
           System.out.println("Type error");
           System.exit(0);
         }
 
-        //System.out.println(n.f0.f0.choice.accept(this,argu));
-        //System.out.println(n.f2.f0.choice.accept(this,argu));
-        return left_type;
+        return new IntegerType();
     }
 
     @Override
@@ -420,23 +589,6 @@ public class MyVisitor extends GJDepthFirst {
       //get class table from current environment
       //System.out.println(instance.get_cur());
       MethodTable MT = (MethodTable) instance.get_cur();
-
-
-      /*
-      //get class table from current environment
-      Object Table = instance.get_cur();
-      ClassTable CT = null;
-      MethodTable MT = null;
-      // get method table
-      if (Table instanceof ClassTable) {
-        CT = (ClassTable) instance.get_cur();
-        MT =  CT.get_method(MethodName);
-      }
-      else if (Table instanceof MethodTable)
-        MT =  (MethodTable) Table;
-      */
-
-
 
       //get left and right side type, then compare
       Object left = n.f0.f0.choice.accept(this,argu);
@@ -452,11 +604,6 @@ public class MyVisitor extends GJDepthFirst {
         String id = (String) left;
         left_type = MT.l_get(id);
       }
-      //or else it should be type error
-      else {
-        System.out.println("Type error");
-        System.exit(0);
-      }
 
       if (right instanceof IntegerType) {
         right_type = (Node) right;
@@ -466,20 +613,13 @@ public class MyVisitor extends GJDepthFirst {
         String id = (String) right;
         right_type = MT.l_get(id);
       }
-      //or else it should be type error
-      else {
-        System.out.println("Type error");
-        System.exit(0);
-      }
 
       if(left_type == null || right_type == null || !left_type.getClass().equals(right_type.getClass())) {
         System.out.println("Type error");
         System.exit(0);
       }
 
-      //System.out.println(n.f0.f0.choice.accept(this,argu));
-      //System.out.println(n.f2.f0.choice.accept(this,argu));
-      return left_type;
+      return new IntegerType();
     }
 
     @Override
@@ -503,11 +643,6 @@ public class MyVisitor extends GJDepthFirst {
           String id = (String) left;
           left_type = MT.l_get(id);
         }
-        //or else it should be type error
-        else {
-          System.out.println("Type error");
-          System.exit(0);
-        }
 
         if (right instanceof IntegerType) {
           right_type = (Node) right;
@@ -517,20 +652,13 @@ public class MyVisitor extends GJDepthFirst {
           String id = (String) right;
           right_type = MT.l_get(id);
         }
-        //or else it should be type error
-        else {
-          System.out.println("Type error");
-          System.exit(0);
-        }
 
         if(left_type == null || right_type == null || !left_type.getClass().equals(right_type.getClass())) {
           System.out.println("Type error");
           System.exit(0);
         }
 
-        //System.out.println(n.f0.f0.choice.accept(this,argu));
-        //System.out.println(n.f2.f0.choice.accept(this,argu));
-        return left_type;
+        return new IntegerType();
     }
 
     @Override
@@ -539,7 +667,7 @@ public class MyVisitor extends GJDepthFirst {
         MethodTable MT = (MethodTable) instance.get_cur();
 
         String arr_id = (String) n.f0.accept(this,argu);
-        String ele_id = (String) n.f2.accept(this,argu);
+        //String ele_id = (String) n.f2.accept(this,argu);
 
         //System.out.println("array: " + n.f0.accept(this,argu));
         //System.out.println("element " + n.f2.accept(this,argu));
@@ -548,10 +676,16 @@ public class MyVisitor extends GJDepthFirst {
         //look up in method parameters first
         Node arr_type = null;
         Node ele_type = null;
-
         //check for parameters first, if nothing found, check locals
         arr_type =  MT.p_get(arr_id) == null ? MT.l_get(arr_id) : MT.p_get(arr_id);
-        ele_type =  MT.p_get(ele_id) == null ? MT.l_get(ele_id) : MT.p_get(ele_id);
+
+        Object obj = n.f2.accept(this,argu);
+        if (obj instanceof String) {
+          String ele_id = (String) obj;
+          ele_type =  MT.p_get(ele_id) == null ? MT.l_get(ele_id) : MT.p_get(ele_id);
+        }
+        else if (obj instanceof IntegerType)
+          ele_type = (IntegerType) obj;
 
         //if still nothing, ID does not exist
         if(arr_type == null || ele_type == null) {
@@ -564,12 +698,27 @@ public class MyVisitor extends GJDepthFirst {
           System.exit(0);
         }
 
-        return ele_type;
+        return new IntegerType();
     }
 
     @Override
     public Object visit(ArrayLength n, Object argu) {
-        return super.visit(n, argu);
+        ClassList instance = ClassList.getInstance();
+        MethodTable MT = (MethodTable) instance.get_cur();
+        Object obj = n.f0.accept(this,argu);
+        Node type = null;
+
+        if (obj instanceof String)
+          type = MT.p_get((String) obj) == null ? MT.l_get((String) obj) : MT.p_get((String) obj);
+        else if (obj instanceof ArrayType)
+          type = (ArrayType) obj;
+
+        if(!(type instanceof ArrayType)){
+          System.out.println("Type error");
+          System.exit(0);
+        }
+
+        return new IntegerType();
     }
 
     @Override
@@ -638,45 +787,65 @@ public class MyVisitor extends GJDepthFirst {
           new_MT = CT.get_method(MethodName);
         }
 
-        //if the reference method is null
+        //switch back to pre env
+        //in case the accept method transfers control to visitors
+        instance.set_cur(MT);
+
+        //if the callee method is null
         //probably because the method is define in other classes
         if (new_MT == null) {
           //this will only get us an Identifier ID
           //we'll need to extract the String manually
-          Node ID = MT.l_get(ClassName);
-          String id = (String) ID.accept(this,argu);
-          new_MT = instance.cross_get_method(id, MethodName);
+          Node class_id = MT.l_get(ClassName);
+
+          //class_id == null, meaning ClassName could
+          //hold the class name type, we could directly pass the name
+          if(class_id == null)
+            new_MT = instance.cross_get_method(ClassName, MethodName);
+
+          //else we need to search the class name type
+          //corresponding to the class ID
+          else {
+            String id = (String) class_id.accept(this,argu);
+            new_MT = instance.cross_get_method(id, MethodName);
+          }
         }
 
-        //switch back to pre env
-        //in case the accept method transfers control to visitors
-        instance.set_cur(MT);
-        //System.out.println("back!!!!!!!!!!!!!!!");
-        //System.out.println("______________________________");
+        //at this point, if new_MT, AKA the callee method,
+        //is null, probably because it does not exist
+        if(new_MT == null) {
+          System.out.println("Type error");
+          System.exit(0);
+        }
 
         //get parameter type
         ExpressionList EL = (ExpressionList)n.f4.node;
 
         //if it's a method wihout taking any argument
         //no need to continue, just return the method's return type
+        //However, we still need to double check if this is true
         if(EL == null) {
-          return new_MT == null ? null : new_MT.get_ret();
+          if(new_MT.parameters.size() != 0) {
+            System.out.println("Type error");
+            System.exit(0);
+          }
+
+          return new_MT.get_ret();
         }
 
         Vector<Node> para_list = EL.f1.nodes;
         Expression E = EL.f0;
 
-        //the first parameter type
+        //the first argument type
         Object obj = E.f0.choice.accept(this,argu);
-        Node type = null;
+        Node arg_type = null;
 
-        //Note!!:could be BooleanLiteral, 'true' or 'false'
         //check if the parameter is an ID or IntegerLiteral
         if (obj instanceof String) {
-          type = MT.p_get((String) obj) == null ? MT.l_get((String) obj) : MT.p_get((String) obj);
+          arg_type = MT.p_get((String) obj) == null ? MT.l_get((String) obj) : MT.p_get((String) obj);
         }
         else
-          type = (Node) obj;
+          arg_type = (Node) obj;
 
         //type check number of parameters
         int para_nums = para_list.size() + (E == null ? 0 : 1);
@@ -689,7 +858,35 @@ public class MyVisitor extends GJDepthFirst {
           //only one parameter
           if(para_list.isEmpty()) {
             for(Node pt : new_MT.parameters.values()) {
-              if(!type.getClass().equals(pt.getClass())) {
+              //System.out.println("arugument: "+ arg_type.accept(this,argu));
+              //System.out.println("parameter: " + arg_type.accept(this,argu));
+
+              //subtype passing
+              if (pt instanceof Identifier && arg_type instanceof Identifier) {
+                String para_type = (String) pt.accept(this,argu);
+                String argu_type = (String) arg_type.accept(this,argu);
+
+                //type check argument vs parament finished
+                //exit early here
+                if(para_type.equals(argu_type)) {
+                  return new_MT.get_ret();
+                }
+
+                ClassTable cur_table = instance.get(argu_type);
+                String argu_super_type = cur_table.get_super_id();
+                while(argu_super_type != null && !para_type.equals(argu_super_type)) {
+                  cur_table = instance.get(argu_super_type);
+                  argu_super_type = cur_table.get_super_id();
+                }
+
+                //check the result type after the while loop
+                if(argu_super_type == null && !para_type.equals(argu_super_type)){
+                  System.out.println("Type error");
+                  System.exit(0);
+                }
+              }
+              //primitive type passing
+              else if(!arg_type.getClass().equals(pt.getClass())) {
                 System.out.println("Type error");
                 System.exit(0);
               }
@@ -698,7 +895,7 @@ public class MyVisitor extends GJDepthFirst {
           //handle multiple arguments/parameters
           else {
               List<Node> paras = new ArrayList<Node>();
-              paras.add(type);  //add the first parameter to the parameter list
+              paras.add(arg_type);  //add the first parameter to the parameter list
               for(int i= 0; i<para_list.size(); i++) {
                 Node ER = para_list.elementAt(i);
                 Object temp = ER.accept(this,argu);   //unkown danger?
@@ -721,7 +918,22 @@ public class MyVisitor extends GJDepthFirst {
 
               List<Node> p = new ArrayList<Node>(new_MT.parameters.values());
               for(int i = 0; i<paras.size(); i++) {
-                if(!(paras.get(i).getClass().equals(p.get(i).getClass()))) {
+                if (paras.get(i) instanceof Identifier && p.get(i) instanceof Identifier) {
+                  String argu_type = (String) paras.get(i).accept(this,argu);
+                  String para_type = (String) p.get(i).accept(this,argu);
+
+                  while(argu_type != null && !argu_type.equals(para_type)) {
+                    ClassTable cur_table = instance.get(argu_type);
+                    argu_type = cur_table.get_super_id();
+                  }
+
+                  if(argu_type == null && !para_type.equals(argu_type)) {
+                    System.out.println("Type error");
+                    System.exit(0);
+                  }
+                }
+
+                else if(paras.get(i) == null || !(paras.get(i).getClass().equals(p.get(i).getClass()))) {
                   System.out.println("Type error");
                   System.exit(0);
                 }
@@ -729,7 +941,7 @@ public class MyVisitor extends GJDepthFirst {
           }
         }
 
-        return new_MT == null ? null : new_MT.get_ret();
+        return new_MT.get_ret();
     }
 
     @Override
@@ -768,7 +980,6 @@ public class MyVisitor extends GJDepthFirst {
     @Override
     public Object visit(Identifier n, Object argu) {
         //System.out.println(n.f0.tokenImage instanceof String);
-
         return n.f0.tokenImage;
         //return super.visit(n, argu);
     }
@@ -777,6 +988,13 @@ public class MyVisitor extends GJDepthFirst {
     public Object visit(ThisExpression n, Object argu) {
         ClassList instance = ClassList.getInstance();
         ClassTable CT = (ClassTable) instance.get_cur_class();
+
+        //class must exist
+        if(CT == null) {
+          System.out.println("Type error");
+          System.exit(0);
+        }
+
         return CT.get_id();
         //return new ThisExpression();
     }
@@ -786,9 +1004,16 @@ public class MyVisitor extends GJDepthFirst {
         ClassList instance = ClassList.getInstance();
         //get class table from current environment
         MethodTable MT = (MethodTable) instance.get_cur();
-        String ele_id = (String)n.f3.accept(this,argu);
-        Node ele_type = MT.p_get(ele_id) == null ? MT.l_get(ele_id) : MT.p_get(ele_id);
+        //String ele_id = (String)n.f3.accept(this,argu);
+        Object obj  = n.f3.accept(this,argu);
+        Node ele_type = null;
 
+        if (obj instanceof IntegerType)
+          ele_type = (IntegerType) obj;
+        else if (obj instanceof String) {
+          String ele_id = (String) obj;
+          ele_type = MT.p_get(ele_id) == null ? MT.l_get(ele_id) : MT.p_get(ele_id);
+        }
 
         if (ele_type == null || !(ele_type instanceof IntegerType)) {
           System.out.println("Type error");
@@ -800,6 +1025,8 @@ public class MyVisitor extends GJDepthFirst {
 
     @Override
     public Object visit(AllocationExpression n, Object argu) {
+        //System.out.println("1 : "+n.f1.accept(this,argu));
+        //System.out.println("2 : " +n.f1);
         return n.f1;
     }
 
@@ -810,16 +1037,12 @@ public class MyVisitor extends GJDepthFirst {
         Node type = null;
         Object obj = n.f1.accept(this,argu);
 
-        if(obj instanceof Identifier) {
-          System.out.println("not fix this");
-          System.exit(0);
-        }
-
-        if(obj instanceof String && (String) obj != "true" && (String) obj != "false")
+        if(obj instanceof String)
           type = MT.p_get((String) obj) == null ? MT.l_get((String) obj) : MT.p_get((String) obj);
         else if (obj instanceof BooleanType)
-          {}
-        else if ((String) obj != "true" || (String) obj != "false") {
+          type = (BooleanType) obj;
+
+        if(!(type instanceof BooleanType)){
           System.out.println("Type error");
           System.exit(0);
         }
@@ -829,6 +1052,27 @@ public class MyVisitor extends GJDepthFirst {
 
     @Override
     public Object visit(BracketExpression n, Object argu) {
-        return n.f1.accept(this,argu);
+        //could be literal type or ID
+        ClassList instance = ClassList.getInstance();
+        MethodTable MT = (MethodTable) instance.get_cur();
+        Node type = null;
+        Object obj = n.f1.accept(this,argu);
+
+        if (obj instanceof String)
+          type = MT.p_get((String) obj) == null ? MT.l_get((String) obj) : MT.p_get((String) obj);
+        else if (obj instanceof IntegerType)
+          type = (IntegerType) obj;
+        else if (obj instanceof BooleanType)
+          type = (BooleanType) obj;
+        else if (obj instanceof ArrayType)
+          type = (ArrayType) obj;
+        else if (obj instanceof Identifier)
+          type = (Identifier) obj;
+        else{
+          System.out.println("Type error");
+          System.exit(0);
+        }
+
+        return type;
     }
 }

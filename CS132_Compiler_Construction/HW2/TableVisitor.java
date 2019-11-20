@@ -34,14 +34,6 @@ public class TableVisitor extends GJDepthFirst {
 
     @Override
     public Object visit(Goal n, Object argu) {
-        ClassList instance = ClassList.getInstance();
-
-        Vector<Node> vec = n.f1.nodes;
-        Iterator it = vec.iterator();
-
-        //print Main name
-        //System.out.println(n.f0.accept(this,argu));
-
         return super.visit(n, argu);
     }
 
@@ -53,26 +45,8 @@ public class TableVisitor extends GJDepthFirst {
         String  mainName = (String) n.f6.accept(this,argu); // main name
         String className = (String) n.f1.accept(this,argu); //class name
 
-        //insert locals variables from main function
-        Vector<Node> vec =  n.f14.nodes;
-        Iterator it = vec.iterator();
-        while(it.hasNext()) {
-          VarDeclaration vd = (VarDeclaration) it.next();
-          String id = (String) vd.f1.accept(this,argu);
-          Node type = vd.f0.f0.choice;
-          M_Table.l_insert(id, type);
-        }
-
-        /*
-        //check statements
-        vec = n.f15.nodes;
-        it = vec.iterator();
-        while(it.hasNext()) {
-          Statement stmt = (Statement) it.next();
-          System.out.println("statement: " + stmt.f0.choice.accept(this,argu));
-        }
-        */
-
+        //Class identifier, for 'this' purpose
+        C_Table.set_id(n.f1);
 
         //Store String[] args in main as ArrayType in table
         //since there is no String[] type in miniJAVA
@@ -80,11 +54,25 @@ public class TableVisitor extends GJDepthFirst {
         String pn = (String) n.f11.accept(this,argu);
         M_Table.p_insert(pn, new ArrayType());
 
+        //insert locals variables from main function
+        Vector<Node> vec =  n.f14.nodes;
+        Iterator it = vec.iterator();
+        while(it.hasNext()) {
+          VarDeclaration vd = (VarDeclaration) it.next();
+          String id = (String) vd.f1.accept(this,argu);
+          Node type = vd.f0.f0.choice;
+          if(M_Table.locals.containsKey(id) || M_Table.parameters.containsKey(id)) {
+            System.out.println("Type error");
+            System.exit(0);
+          }
+          M_Table.l_insert(id, type);
+        }
+
         C_Table.insert_method(mainName, M_Table);
         instance.insert(className, C_Table);
 
-        //return n.f1.accept(this,argu);
-        return super.visit(n, argu);
+        //return super.visit(n, argu);
+        return n.f15.accept(this,argu);
     }
 
     @Override
@@ -113,8 +101,12 @@ public class TableVisitor extends GJDepthFirst {
           String id = (String) paras.f1.accept(this,argu);
           Node type = paras.f0.f0.choice;
 
-          //System.out.println("type: " + paras.f0.f0.choice.getClass());
-          //System.out.println("id: " + id);
+          //check if inserted before
+          if(C_Table.fields.containsKey(id)) {
+            System.out.println("Type error");
+            System.exit(0);
+          }
+
           C_Table.insert_field(id, type);
         }
 
@@ -126,49 +118,89 @@ public class TableVisitor extends GJDepthFirst {
           String id = (String) md.f2.accept(this,argu);
           MethodTable mt = (MethodTable)md.accept(this,argu);
 
+          //check if method name has been used already
+          if(C_Table.methodTables.containsKey(id)){
+            System.out.println("Type error");
+            System.exit(0);
+          }
+
           C_Table.insert_method(id, mt);
-          //mt = C_Table.get_method(id);
-          //System.out.println("parameters: " + mt.parameters);
-          //System.out.println("locals: " + mt.locals);
-          //System.out.println("return type: " + mt.ret_type);
         }
 
         //After finished setting up the class table
         //insert the class name and its class table to ClassList
-        instance.insert(ClassName, C_Table);
+        //but lets check if classname has already been used
+        if(instance.C_List.containsKey(ClassName)) {
+          System.out.println("Type error");
+          System.exit(0);
+        }
 
-        //here may lead to a bug, double accept!!!!!!!!!
+        instance.insert(ClassName, C_Table);
         return super.visit(n,argu);
     }
 
     @Override
     public Object visit(ClassExtendsDeclaration n, Object argu) {
-        return super.visit(n, argu);
+        ClassList instance = ClassList.getInstance();
+        ClassTable C_Table = new ClassTable();
+        MethodTable M_Table = new MethodTable();
+        String ClassName = (String) n.f1.accept(this,argu);
+
+        //Class identifier, for 'this' purpose
+        C_Table.set_id(n.f1);
+
+        //Super Class identifier, for 'extends' purpose
+        C_Table.set_super_id((String)n.f3.accept(this,argu));
+
+        //Class fields
+        Vector<Node> vec = n.f5.nodes;
+        Iterator it = vec.iterator();
+
+        //System.out.println("class name: " + n.f1.accept(this,argu));
+        while(it.hasNext()) {
+          VarDeclaration paras = (VarDeclaration)it.next();
+          String id = (String) paras.f1.accept(this,argu);
+          Node type = paras.f0.f0.choice;
+
+          //check if inserted before
+          if(C_Table.fields.containsKey(id)) {
+            System.out.println("Type error");
+            System.exit(0);
+          }
+
+          C_Table.insert_field(id, type);
+        }
+
+        //Class methods
+        vec = n.f6.nodes;
+        it = vec.iterator();
+        while(it.hasNext()) {
+          MethodDeclaration md = (MethodDeclaration)it.next();
+          String id = (String) md.f2.accept(this,argu);
+          MethodTable mt = (MethodTable)md.accept(this,argu);
+
+          //check if method name has been used already
+          if(C_Table.methodTables.containsKey(id)){
+            System.out.println("Type error");
+            System.exit(0);
+          }
+
+          C_Table.insert_method(id, mt);
+        }
+
+        //After finished setting up the class table
+        //insert the class name and its class table to ClassList
+        if(instance.C_List.containsKey(ClassName)) {
+          System.out.println("Type error");
+          System.exit(0);
+        }
+
+        instance.insert(ClassName, C_Table);
+        return super.visit(n,argu);
     }
 
     @Override
     public Object visit(VarDeclaration n, Object argu) {
-
-        /*
-        SymbolTable instance = SymbolTable.getInstance();
-        String newKey = n.f1.f0.tokenImage;
-        Node newType = n.f0.f0.choice;
-
-        // check if a variable is declared more than once
-        // Also used to check if return type match with its declare type
-        if(instance.get(newKey) != null) {
-          Node oldType = instance.get(newKey);
-          if(!oldType.getClass().equals(newType.getClass())) {
-            System.out.println("return Type error");
-            System.exit(0);
-          }
-        }
-
-        instance.insert(newKey, newType);
-
-        //return the type node
-        return n.f0.f0.choice;
-        */
         return super.visit(n,argu);
     }
 
@@ -178,7 +210,18 @@ public class TableVisitor extends GJDepthFirst {
 
         //insert treturn type
         Node ret_type = n.f1.f0.choice;
+        if (!(ret_type instanceof BooleanType || ret_type instanceof ArrayType
+            || ret_type instanceof IntegerType || ret_type instanceof Identifier) ) {
+              System.out.println("Type error");
+              System.exit(0);
+        }
         M_Table.set_ret(ret_type);
+
+        //insert parameters list
+        if(n.f4.node != null) {
+          LinkedHashMap<String, Node> paras_list = (LinkedHashMap<String, Node>)n.f4.node.accept(this,argu);
+          M_Table.parameters.putAll(paras_list);
+        }
 
         //insert locals
         Vector<Node> vec = n.f7.nodes;
@@ -189,21 +232,14 @@ public class TableVisitor extends GJDepthFirst {
           String id = (String) locals.f1.accept(this,argu);
           Node type = locals.f0.f0.choice;
 
-          //System.out.println("type: " + locals.f0.f0.choice.getClass().getSimpleName());
-          //System.out.println("id: " + id);
+          //locals name and parameters name should all be distinct
+          if(M_Table.locals.containsKey(id) || M_Table.parameters.containsKey(id)) {
+            System.out.println("Type error");
+            System.exit(0);
+          }
+
           M_Table.l_insert(id, type);
         }
-
-        //System.out.println("locals: " + M_Table.locals);
-
-        //insert parameters list
-        if(n.f4.node != null) {
-          LinkedHashMap<String, Node> paras_list = (LinkedHashMap<String, Node>)n.f4.node.accept(this,argu);
-          M_Table.parameters.putAll(paras_list);
-          //System.out.println("para: " + M_Table.parameters);
-        }
-
-        //System.out.println("para: " + M_Table.parameters);
 
         return M_Table;
     }
@@ -220,6 +256,14 @@ public class TableVisitor extends GJDepthFirst {
         while (it.hasNext()){
           FormalParameterRest para_rest = (FormalParameterRest)it.next();
           LinkedHashMap<String, Node> parameter = (LinkedHashMap<String, Node>)para_rest.f1.accept(this,argu);
+
+          //all parameter names must be distinct
+          for(String id: parameter.keySet()) {
+            if(lhm.containsKey(id)){
+              System.out.println("Type error");
+              System.exit(0);
+            }
+          }
 
           lhm.putAll(parameter);
         }
