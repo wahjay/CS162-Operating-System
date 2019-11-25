@@ -1,7 +1,7 @@
 
 
-|Homework | Score |   
-|--------|-------|   
-| HW1 | 100%   |
-| HW2 | 99%  (missed 1 or 2 hidden test case)|
-| HW3 | 91% |
+|Homework | Score | Description |
+|--------|-------|--------------|
+| HW1 | 100%   | Program Parser |
+| HW2 | 99%    | Type Checker  |
+| HW3 | 91%    | Logic Checker | 
