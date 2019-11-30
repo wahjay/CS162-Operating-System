@@ -1,6 +1,6 @@
 
 
-|Homework | Score | Description |
+|Homework | Score | Task |
 |--------|-------|--------------|
 | HW1 | 100%   | Program Parser |
 | HW2 | 99%    | Type Checker  |
