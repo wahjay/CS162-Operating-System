@@ -9,15 +9,7 @@ Expose the student to an analytic and comparative way of looking at programming 
 
 Basic concepts in design and use of programming languages, including abstraction, modularity, control mechanisms, types, declarations, syntax, and semantics. Study of several different language paradigms, including functional, object-oriented, and logic programming.
 
-### Languages Covered
-
-OCaml
-Java
-Prolog
-Scheme
-Python
-Kotlin
-Assignment Overviews
+### Assignment Overviews
 
 H1 (OCaml) - Fixpoints and grammar filters
 OCaml warmup -- writing simple functions on sets (e.g. subset, union, intersection, etc.)
