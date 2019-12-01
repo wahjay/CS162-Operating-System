@@ -1,4 +1,11 @@
 
+## Compiler Construction
+
+### Course objective: understand compilers and build one yourself!
+
+### Description
+The compiler is broke down into five parts, and thus five total homeworks.
+
 
 |Homework | Score | Task |
 |--------|-------|--------------|
