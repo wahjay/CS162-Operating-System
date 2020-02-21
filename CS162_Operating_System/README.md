@@ -28,4 +28,4 @@ The operating system kernel provides well-documented interfaces for building she
 Build a Http Server in C.
 
 ### Homework 3
-Buuild a Http Server in Golang.
+Build a Http Server in Golang.
